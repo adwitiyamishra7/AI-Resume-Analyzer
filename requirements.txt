@@ -1,6 +1,6 @@
 flask
 numpy
-faiss-cpu
+faiss-cpu==1.7.4
 sentence-transformers
 scikit-learn
 pypdf

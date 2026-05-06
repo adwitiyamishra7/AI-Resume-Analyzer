@@ -1,5 +1,5 @@
 flask
-numpy
+numpy==1.26.4
 faiss-cpu==1.7.4
 sentence-transformers
 scikit-learn

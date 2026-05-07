@@ -1,0 +1,306 @@
+# 🚀 AI Resume Analyzer & Job Intelligence System
+
+An AI-powered Resume Analyzer and ATS Optimization platform built using **Flask, NLP, RAG (Retrieval-Augmented Generation), Vector Search, and LLM Integration**.
+
+This project helps users:
+
+* Analyze resumes intelligently
+* Compare resumes against job descriptions
+* Detect missing skills
+* Improve ATS compatibility
+* Get AI-generated suggestions
+* Perform semantic document understanding using RAG
+
+---
+
+# 🌐 Live Deployment
+
+### 🔗 Live App
+
+[https://adwitiya1221-ai-resume-analyzer.hf.space](https://adwitiya1221-ai-resume-analyzer.hf.space)
+
+### 🔗 GitHub Repository
+
+[https://github.com/adwitiyamishra7/AI-Resume-Analyzer](https://github.com/adwitiyamishra7/AI-Resume-Analyzer)
+
+---
+
+# ✨ Features
+
+## 📄 Resume Analysis
+
+* Upload PDF resumes
+* Extracts resume text automatically
+* Performs ATS-style analysis
+* Detects important keywords
+* Gives resume insights
+
+## 🎯 Resume vs Job Matching
+
+* Compare resume against job descriptions
+* Semantic similarity matching
+* Intelligent skill-gap detection
+* AI-powered recommendations
+
+## 🧠 RAG (Retrieval-Augmented Generation)
+
+* Context-aware document understanding
+* Embedding-based retrieval system
+* Vector search pipeline
+* LLM-enhanced responses
+
+## 🤖 AI Integration
+
+* OpenRouter API integration
+* LLM-generated recommendations
+* Resume enhancement suggestions
+* NLP-powered analysis
+
+## 🌍 Deployment Ready
+
+* Fully deployed on Hugging Face Spaces
+* Dockerized deployment
+* Publicly accessible live app
+
+---
+
+# 🛠️ Tech Stack
+
+## Backend
+
+* Python
+* Flask
+
+## AI / ML / NLP
+
+* Sentence Transformers
+* FAISS Vector Database
+* RAG Pipeline
+* NLP Processing
+* Embeddings
+
+## Frontend
+
+* HTML
+* CSS
+* JavaScript
+
+## Deployment
+
+* Hugging Face Spaces
+* Docker
+* GitHub
+
+---
+
+# 🧩 System Architecture
+
+```text
+User Uploads Resume PDF
+           │
+           ▼
+PDF Text Extraction
+           │
+           ▼
+Text Chunking & Preprocessing
+           │
+           ▼
+Sentence Embeddings
+           │
+           ▼
+FAISS Vector Database
+           │
+           ▼
+Relevant Context Retrieval
+           │
+           ▼
+OpenRouter LLM Processing
+           │
+           ▼
+ATS Analysis + Suggestions + Matching
+```
+
+---
+
+# 📂 Project Structure
+
+```text
+AI-Resume-Analyzer/
+│
+├── app.py
+├── rag_core.py
+├── requirements.txt
+├── Dockerfile
+├── templates/
+│   └── index.html
+├── static/
+├── uploads/
+├── temp.pdf
+└── README.md
+```
+
+---
+
+# ⚙️ Installation & Setup
+
+## 1️⃣ Clone Repository
+
+```bash
+git clone https://github.com/adwitiyamishra7/AI-Resume-Analyzer.git
+cd AI-Resume-Analyzer
+```
+
+---
+
+## 2️⃣ Create Virtual Environment
+
+### Windows
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+### Linux / Mac
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+---
+
+## 3️⃣ Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 4️⃣ Run Application
+
+```bash
+python app.py
+```
+
+---
+
+# 🐳 Docker Deployment
+
+## Build Docker Image
+
+```bash
+docker build -t ai-resume-analyzer .
+```
+
+## Run Docker Container
+
+```bash
+docker run -p 7860:7860 ai-resume-analyzer
+```
+
+---
+
+# ☁️ Hugging Face Deployment
+
+This project is deployed using:
+
+* Hugging Face Spaces
+* Docker SDK
+* CPU Basic Hardware
+
+## Deployment Steps
+
+1. Create Hugging Face Space
+2. Select Docker SDK
+3. Upload project files
+4. Add OpenRouter API key in Secrets
+5. Deploy automatically
+
+---
+
+# 🔑 Environment Variables
+
+Create secrets/environment variables:
+
+```env
+OPENROUTER_API_KEY=your_api_key
+```
+
+---
+
+# 📸 Screenshots
+
+## Home Page
+
+* Resume upload interface
+* ATS analysis dashboard
+* Job matching interface
+
+## AI Features
+
+* Resume scoring
+* Skill detection
+* AI recommendations
+
+---
+
+# 📈 Future Improvements
+
+* Multi-resume comparison
+* Advanced ATS scoring
+* Interview question generation
+* Resume ranking system
+* User authentication
+* Database integration
+* Analytics dashboard
+* Multi-format document support
+
+---
+
+# 🎓 Learning Outcomes
+
+This project helped in learning:
+
+* RAG architecture
+* NLP pipelines
+* Embeddings & Vector Search
+* Flask backend development
+* Docker deployment
+* Hugging Face deployment
+* Git & GitHub workflow
+* LLM integration
+* AI application deployment
+
+---
+
+# 👨‍💻 Author
+
+## Adwitiya Mishra
+
+B.Tech CSE (AI & ML)
+
+Passionate about:
+
+* AI/ML
+* Full Stack Development
+* NLP Systems
+* RAG Applications
+* Intelligent AI Products
+
+---
+
+# ⭐ Support
+
+If you liked this project:
+
+* Star the repository
+* Share feedback
+* Connect for collaboration
+
+---
+
+# 📜 License
+
+This project is licensed under the Apache-2.0 License.

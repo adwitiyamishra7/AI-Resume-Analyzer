@@ -5,9 +5,9 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import requests
 
-# ==============================
+
 # 1. LOAD PDF
-# ==============================
+
 def load_pdf(file_path):
     reader = PdfReader(file_path)
     text = ""
@@ -18,9 +18,48 @@ def load_pdf(file_path):
     return text
 
 
-# ==============================
+def is_resume_document(text):
+    normalized = re.sub(r"\s+", " ", text.lower())
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+
+    section_keywords = [
+        "experience", "work experience", "employment", "education", "skills",
+        "technical skills", "projects", "certifications", "summary", "objective",
+    ]
+    profile_patterns = [
+        r"\S+@\S+\.\S+",
+        r"\+?\d[\d\s\-]{8,}\d",
+        r"linkedin\.com",
+        r"github\.com",
+    ]
+    role_keywords = [
+        "developer", "engineer", "analyst", "intern", "manager", "specialist",
+        "consultant", "designer", "architect", "student", "candidate",
+    ]
+
+    section_hits = sum(1 for keyword in section_keywords if keyword in normalized)
+    profile_hits = sum(1 for pattern in profile_patterns if re.search(pattern, normalized))
+    role_hits = sum(1 for keyword in role_keywords if keyword in normalized)
+
+    likely_name_at_top = False
+    for line in lines[:5]:
+        if re.search(r"[@\d:/]", line):
+            continue
+        words = line.split()
+        if 2 <= len(words) <= 4 and all(word.replace(".", "").isalpha() for word in words):
+            likely_name_at_top = True
+            break
+
+    return (
+        section_hits >= 3
+        or (section_hits >= 2 and profile_hits >= 1)
+        or (section_hits >= 2 and role_hits >= 1 and likely_name_at_top)
+    )
+
+
+
 # 2. CHUNKING
-# ==============================
+
 def chunking(text, chunk_size=600, overlap=80):
     chunks = []
     start = 0
@@ -30,10 +69,8 @@ def chunking(text, chunk_size=600, overlap=80):
         start += chunk_size - overlap
     return chunks
 
-
-# ==============================
 # 3. EMBEDDINGS (TF-IDF + MiniLM optional)
-# ==============================
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 _embed_model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -51,9 +88,8 @@ def create_emb(chunks):
     return embeddings.astype("float32"), vectorizer
 
 
-# ==============================
 # 4. FAISS INDEX
-# ==============================
+
 def create_index(embeddings):
     dim = embeddings.shape[1]
     index = faiss.IndexFlatL2(dim)
@@ -61,9 +97,8 @@ def create_index(embeddings):
     return index
 
 
-# ==============================
 # 5. SEARCH
-# ==============================
+
 def search(query, index, chunks, vectorizer=None, k=5):
     # TF-IDF part
     q_tfidf = vectorizer.transform([query]).toarray()
@@ -77,9 +112,8 @@ def search(query, index, chunks, vectorizer=None, k=5):
     return [chunks[i] for i in indices[0]]
 
 
-# ==============================
 # 6. LLM (OpenRouter)
-# ==============================
+
 OPENROUTER_API_KEY = "Bearer sk-or-v1-REPLACE_WITH_YOUR_KEY"
 
 def generate_ans(context, query):
@@ -116,12 +150,14 @@ Answer:
         return "Not found in document"
 
 
-# ==============================
 # 7. PROFILE / CAPABILITY (simple rules)
-# ==============================
+
 def is_profile_query(q):
     q = q.lower()
-    return any(x in q for x in ["name", "email", "phone", "location", "address"])
+    return any(x in q for x in [
+        "name", "email", "phone", "location", "address",
+        "linkedin", "linked in", "github", "git hub", "githu",
+    ])
 
 def is_capability_query(q):
     q = q.lower()
@@ -242,6 +278,26 @@ def extract_name(text):
 
 def extract_profile_answer(text, query):
     query_l = query.lower()
+    normalized_text = _normalize_url_spacing(text)
+
+    if "linkedin" in query_l or "linked in" in query_l:
+        m = re.search(r"(?:https?://)?(?:www\.)?linkedin\.com/[^\s,;]+", normalized_text, flags=re.IGNORECASE)
+        if m:
+            link = m.group(0).rstrip(".,)")
+            if not link.lower().startswith(("http://", "https://")):
+                link = "https://" + link
+            return link
+        return ""
+
+    if "github" in query_l or "git hub" in query_l or "githu" in query_l:
+        m = re.search(r"(?:https?://)?(?:www\.)?github\.com/[^\s,;]+", normalized_text, flags=re.IGNORECASE)
+        if m:
+            link = m.group(0).rstrip(".,)")
+            if not link.lower().startswith(("http://", "https://")):
+                link = "https://" + link
+            return link
+        return ""
+
     if "email" in query_l:
         m = re.search(r"\S+@\S+\.\S+", text)
         return m.group(0) if m else ""
@@ -290,9 +346,8 @@ def extract_certificate_answer(text, query):
     return _format_multiline_answer(items)
 
 
-# ==============================
 # 8. ATS (HYBRID SKILL EXTRACTION)
-# ==============================
+
 STATIC_SKILLS = [
     # programming
     "python","java","c++","javascript",

@@ -15,7 +15,8 @@ from rag_core import (
     is_capability_query,
     is_certificate_query,
     is_profile_query,
-    calculate_ats_score   # ✅ NEW
+    is_resume_document,
+    calculate_ats_score   # 
 )
 
 app = Flask(__name__)
@@ -25,11 +26,11 @@ chunks = []
 vectorizer = None
 chat_history = []
 document_text = ""
+uploaded_filename = ""
 
 
-# ==============================
 # FORMAT SOURCES
-# ==============================
+
 def format_sources(source_chunks, max_items=3, max_chars=140):
     snippets = []
     for chunk in source_chunks[:max_items]:
@@ -40,26 +41,28 @@ def format_sources(source_chunks, max_items=3, max_chars=140):
     return snippets
 
 
-# ==============================
+
 # MAIN ROUTE
-# ==============================
+
 @app.route("/", methods=["GET", "POST"])
 def home():
-    global index, chunks, vectorizer, chat_history, document_text
+    global index, chunks, vectorizer, chat_history, document_text, uploaded_filename
 
     answer = ""
+    status_type = "info"
     sources = []
-    ats_result = None   # ✅ NEW
+    ats_result = None 
 
     if request.method == "POST":
 
-        # ==============================
+       
         # 1. PDF UPLOAD
-        # ==============================
+   
         if "pdf" in request.files:
             file = request.files["pdf"]
 
             if file and file.filename:
+                uploaded_filename = os.path.basename(file.filename)
                 tmp_path = None
 
                 try:
@@ -79,6 +82,20 @@ def home():
 
                 if not text.strip():
                     answer = "The uploaded PDF is empty or has no extractable text."
+                    status_type = "error"
+                    index = None
+                    chunks = []
+                    vectorizer = None
+                    document_text = ""
+                    chat_history = []
+                elif not is_resume_document(text):
+                    answer = "This does not look like a resume. Please upload a resume PDF."
+                    status_type = "error"
+                    index = None
+                    chunks = []
+                    vectorizer = None
+                    document_text = ""
+                    chat_history = []
                 else:
                     document_text = text
 
@@ -88,10 +105,10 @@ def home():
 
                     chat_history = []
                     answer = "PDF processed successfully."
+                    status_type = "success"
 
-        # ==============================
         # 2. USER QUERY (CHAT)
-        # ==============================
+
         query = request.form.get("query", "").strip()
 
         if query:
@@ -141,9 +158,8 @@ def home():
                 chat_history.append({"q": query, "a": answer})
                 answer = ""
 
-        # ==============================
         # 3. ATS SCORING (NEW FEATURE)
-        # ==============================
+
         job_desc = request.form.get("job_desc", "").strip()
 
         if job_desc and document_text:
@@ -155,20 +171,20 @@ def home():
                 "missing": missing
             }
 
-    # ==============================
     # RETURN RESPONSE
-    # ==============================
+
     return render_template(
         "index.html",
         answer=answer,
+        status_type=status_type,
+        uploaded_filename=uploaded_filename,
         chat=chat_history,
         sources=sources,
         ats=ats_result  
     )
 
-
-# ==============================
 # RUN APP
-# ==============================
+
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+    port = int(os.environ.get("PORT", 7860))
+    app.run(host="0.0.0.0", port=port)

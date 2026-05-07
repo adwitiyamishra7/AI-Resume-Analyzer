@@ -302,6 +302,20 @@
         animation: fade-slide-down 0.4s ease;
       }
 
+      .rendered-only {
+        display: none !important;
+      }
+
+      .jinja-rendered .rendered-only {
+        display: block !important;
+      }
+
+      .jinja-rendered .status-banner.rendered-only,
+      .jinja-rendered .message-row.rendered-only,
+      .jinja-rendered .chat-divider.rendered-only {
+        display: flex !important;
+      }
+
       .status-banner::before {
         content: "";
         width: 6px;
@@ -311,6 +325,21 @@
         box-shadow: 0 0 8px var(--accent-cyan);
         flex-shrink: 0;
         animation: pulse-dot 2s ease-in-out infinite;
+      }
+
+      .status-banner.error {
+        background: linear-gradient(
+          90deg,
+          rgba(239, 68, 68, 0.12),
+          rgba(248, 113, 113, 0.06)
+        );
+        border-color: rgba(248, 113, 113, 0.38);
+        color: #fca5a5;
+      }
+
+      .status-banner.error::before {
+        background: #ef4444;
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
       }
 
       @keyframes pulse-dot {
@@ -707,7 +736,7 @@
           </div>
           <span class="logo-text">Lumina</span>
         </div>
-        <span class="header-badge">PDF Assistant</span>
+        <span class="header-badge">AI PDF Assistant</span>
       </header>
 
       <div class="upload-zone">
@@ -725,7 +754,11 @@
             </div>
             <div class="upload-info">
               <div class="upload-label">Upload Document</div>
-              <div class="upload-sub" id="upload-sub">
+              <div
+                class="upload-sub"
+                id="upload-sub"
+                data-current-filename="{{ uploaded_filename|default('') }}"
+              >
                 PDF files up to 50MB supported
               </div>
             </div>
@@ -741,13 +774,13 @@
           </div>
         </form>
 
-        {% if answer %}
-        <div class="status-banner">{{ answer }}</div>
-        {% endif %}
+        <!-- {% if answer %} -->
+        <div class="status-banner {{ status_type|default('info') }} rendered-only">{{ answer }}</div>
+        <!-- {% endif %} -->
       </div>
 
       <div class="chat-scroll-area" id="chat-area">
-        {% if not chat %}
+        <!-- {% if not chat %} -->
         <div class="empty-state">
           <div class="empty-orb">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -761,11 +794,11 @@
             Upload a PDF and start asking questions about it
           </div>
         </div>
-        {% else %}
-        <div class="chat-divider">Conversation</div>
-        {% for item in chat %}
+        <!-- {% else %} -->
+        <div class="chat-divider rendered-only">Conversation</div>
+        <!-- {% for item in chat %} -->
 
-        <div class="message-row user-row">
+        <div class="message-row user-row rendered-only">
           <div class="avatar avatar-user">U</div>
           <div class="bubble-wrap">
             <div class="bubble-label">You</div>
@@ -773,7 +806,7 @@
           </div>
         </div>
 
-        <div class="message-row">
+        <div class="message-row rendered-only">
           <div class="avatar avatar-ai">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2L2 7l10 5 10-5-10-5z" />
@@ -785,31 +818,31 @@
           </div>
         </div>
 
-        {% endfor %} {% if sources %}
-        <div class="sources-block">
+        <!-- {% endfor %} {% if sources %} -->
+        <div class="sources-block rendered-only">
           <div class="sources-label">Sources</div>
-          {% for s in sources %}
+          <!-- {% for s in sources %} -->
           <span class="source-chip">{{ s }}</span>
-          {% endfor %}
+          <!-- {% endfor %} -->
         </div>
-        {% endif %} {% endif %}
+        <!-- {% endif %} {% endif %} -->
       </div>
 
-      {% if ats %}
-      <div class="sources-block">
+      <!-- {% if ats %} -->
+      <div class="sources-block rendered-only">
         <div class="sources-label">ATS Score: {{ ats.score }}%</div>
 
         <p>Matched Skills:</p>
-        {% for s in ats.matched %}
+        <!-- {% for s in ats.matched %} -->
         <span class="source-chip">&#10004; {{ s }}</span>
-        {% endfor %}
+        <!-- {% endfor %} -->
 
         <p style="margin-top: 10px;">Missing Skills:</p>
-        {% for s in ats.missing %}
+        <!-- {% for s in ats.missing %} -->
         <span class="source-chip">&#10008; {{ s }}</span>
-        {% endfor %}
+        <!-- {% endfor %} -->
       </div>
-      {% endif %}
+      <!-- {% endif %} -->
 
       <div class="input-zone">
         <form method="POST" class="input-form" style="margin-bottom: 10px;">
@@ -847,11 +880,29 @@
 
     <script>
       (function () {
+          const rawVariable = '{' + '{';
+          const rawBlock = '{' + '%';
+          const rawTemplate = document.body.textContent.includes(rawVariable) ||
+              document.body.textContent.includes(rawBlock);
+
+          if (!rawTemplate) {
+              document.documentElement.classList.add('jinja-rendered');
+          }
+      })();
+
+      (function () {
           const area = document.getElementById('chat-area');
           if (area) area.scrollTop = area.scrollHeight;
       })();
 
       const fileInput = document.getElementById('pdf-input');
+      const uploadSub = document.getElementById('upload-sub');
+      if (uploadSub && uploadSub.dataset.currentFilename) {
+          const name = uploadSub.dataset.currentFilename;
+          uploadSub.textContent = name.length > 36 ? name.slice(0, 33) + '...' : name;
+          uploadSub.title = name;
+      }
+
       if (fileInput) {
           fileInput.addEventListener('change', function () {
               const sub = document.getElementById('upload-sub');

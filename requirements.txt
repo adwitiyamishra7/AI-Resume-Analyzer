@@ -1,10 +1,9 @@
 flask
-numpy==1.26.4
-faiss-cpu==1.7.4
-sentence-transformers
-scikit-learn
-pypdf
-requests
 gunicorn
-torch
-transformers
+faiss-cpu
+sentence-transformers
+numpy
+scikit-learn
+PyPDF2
+requests
+openai
